@@ -9,3 +9,6 @@ wire. It has a three pin connector. The second is what our friends get to
 program themselves. They need to hook it up to the box and morse the
 codeword. As code, by a button, however.
 
+![Hint box after powering up](/images/box_with_hint.jpg)
+
+[License](LICENSE.txt): ![Creative Commons BY-NC-SA](images/cc-by-nc-sa.png)
