@@ -71,7 +71,7 @@ typedef enum {
   INSTRUCTIONS,
   HINT
 } State;
-State last_state = INIT;
+volatile State last_state = INIT;
 volatile State state = START;
 
 // Parse buffer of symbols for a single letter
@@ -502,7 +502,7 @@ void process_read_buffer() {
           strcmp(word_buffer, SECRET_WORD_2) == 0) {
         state = HINT;
       }
-      if (strcmp(word_buffer, HELP_WORD) == 0) {
+      if (strcmp(word_buffer, HELP_WORD) == 0 && last_state != INSTRUCTIONS) {
         state = INSTRUCTIONS;
       }
     }
@@ -547,11 +547,11 @@ void loop() {
 
       case INSTRUCTIONS:
         Serial.println("Switching state to INSTRUCTIONS");
-        state = START;
         screenMorseParameters();
         delay(INSTRUCTION_SWITCH_INTERVAL);
         screenMorseAlphabet();
         delay(INSTRUCTION_SWITCH_INTERVAL);
+        state = START;
         break;
 
       case HINT:
