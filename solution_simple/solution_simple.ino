@@ -33,4 +33,42 @@ void write_symbol(int symbol_time_ms) {
 }
 
 void loop() {
+  // Send "freund" over the wire
+  // Morse code alphabet at https://en.wikipedia.org/wiki/Morse_code
+
+  // f: ..-.
+  write_symbol(DOT);
+  write_symbol(DOT);
+  write_symbol(DASH);
+  write_symbol(DOT);
+  delay(LETTER_SPACE);
+
+  // r: .-.
+  write_symbol(DOT);
+  write_symbol(DASH);
+  write_symbol(DOT);
+  delay(LETTER_SPACE);
+
+  // e: .
+  write_symbol(DOT);
+  delay(LETTER_SPACE);
+
+  // u: ..-
+  write_symbol(DOT);
+  write_symbol(DOT);
+  write_symbol(DASH);
+  delay(LETTER_SPACE);
+
+  // n: -.
+  write_symbol(DASH);
+  write_symbol(DOT);
+  delay(LETTER_SPACE);
+
+  // d: -..
+  write_symbol(DASH);
+  write_symbol(DOT);
+  write_symbol(DOT);
+  delay(LETTER_SPACE);
+
+  delay(WORD_SPACE);
 }
