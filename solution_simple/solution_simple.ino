@@ -22,5 +22,15 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
 }
 
+// Writes a single symbol, either DOT or DASH
+void write_symbol(int symbol_time_ms) {
+  digitalWrite(PIN_OUT, LOW);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(symbol_time_ms);
+  digitalWrite(PIN_OUT, HIGH);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(SYMBOL_SPACE);
+}
+
 void loop() {
 }
