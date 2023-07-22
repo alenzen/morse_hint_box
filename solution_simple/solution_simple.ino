@@ -1,5 +1,13 @@
 #define PIN_OUT 11
 
+// Times defined in milliseconds
+#define TIME_UNIT    (250)
+#define DOT          TIME_UNIT
+#define DASH         (3*TIME_UNIT)
+#define SYMBOL_SPACE TIME_UNIT
+#define LETTER_SPACE (3 * TIME_UNIT - SYMBOL_SPACE)
+#define WORD_SPACE   (7 * TIME_UNIT - LETTER_SPACE)
+
 void setup() {
   // Serial setup (optional, can be used for debugging output)
   Serial.begin(115200);
