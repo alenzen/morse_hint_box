@@ -31,6 +31,9 @@ const char *morse_code[MORSE_CODE_LENGTH] = {
 // We accept German and Elvish, no Klingon this time :-)
 #define SECRET_WORD_1 "freund"
 #define SECRET_WORD_2 "mellon"
+#define HELP_WORD "help"
+
+#define INSTRUCTION_SWITCH_INTERVAL 10000
 
 #define TIME_UNIT    (250)
 #define DOT          TIME_UNIT
@@ -112,9 +115,11 @@ void read_morse() {
       //Serial.println(SYMBOL_DASH);
       letter_buffer[letter_buffer_index] = SYMBOL_DASH;
       letter_buffer_index += 1;
-		//} else {
-      //state = INSTRUCTIONS;
-    }
+    } /* else {
+      if (state != HINT) {
+        state = INSTRUCTIONS;
+      }
+    } */
     if (letter_buffer_index >= LETTER_BUFFER_SIZE) {
       // overflow, flush letter buffer
       for (int i = 0; i < LETTER_BUFFER_SIZE; ++i) letter_buffer[i] = 0;
@@ -219,6 +224,120 @@ void screenStart()
     x = ((display.width() - tbw) / 2) - tbx;
     y = (display.height() - tbh - 2) - tby;
     display.setCursor(x, y);
+    display.print(progmem_buffer);
+
+  } while (display.nextPage());
+}
+
+void displayPrintMorseLetter(uint16_t x, uint16_t y, const char* letter) {
+  for (int i = 0; i < strlen(letter); ++i) {
+    if (letter[i] == SYMBOL_DOT) {
+      //fillArc2(x + i * 8, y - 4, 0, 120, 2, 2, 2, GxEPD_YELLOW);
+      display.fillRect(x + i * 8 + 2, y - 10 - 1, 2, 2, GxEPD_YELLOW);
+    } else {
+      display.fillRect(x + i * 8, y - 10 - 1, 6, 2, GxEPD_YELLOW);
+    }
+  }
+}
+
+void screenMorseAlphabet()
+{
+  display.setRotation(1);
+  display.setFullWindow();
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    display.setFont(&FreeSans9pt7b);
+    for (int row = 0; row < 9; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        byte letter_index = row * 4 + col;
+        char letter_buffer[] = {
+          (letter_index < ('z' - 'a' + 1)) ? ('a' + letter_index) : ('0' + letter_index - ('z' - 'a' + 1)),
+          0
+        };
+        int16_t tbx, tby; uint16_t tbw, tbh;
+        display.getTextBounds(letter_buffer, 0, 0, &tbx, &tby, &tbw, &tbh);
+        // center the bounding box by transposition of the origin:
+        uint16_t x = (col * 74) - tbx + 10;
+        uint16_t y = (row * 14) - tby + 1;
+        display.setCursor(x, y);
+        display.setTextColor(GxEPD_BLACK);
+        display.print(letter_buffer);
+
+        display.setCursor(x+20, y);
+        display.setTextColor(GxEPD_YELLOW);
+        displayPrintMorseLetter(x+20, y + 7, morse_code[letter_index]);
+      }
+    }
+  } while (display.nextPage());
+}
+
+const char screenMorseParametersTitle[] PROGMEM = "Morse Parameters";
+const char screenMorseSignal[] PROGMEM = "Signal on LOW";
+const char screenMorseSymbolLengthDesc[] PROGMEM = "Symbol time:";
+const char screenMorseSymbolLength1[] PROGMEM = "DOT 250 ms";
+const char screenMorseSymbolLength2[] PROGMEM = "DASH 750 ms";
+const char screenMorsePauseLengthDesc[] PROGMEM = "Pause time: ";
+const char screenMorsePauseLength1[] PROGMEM = "Symbol 250 ms";
+const char screenMorsePauseLength2[] PROGMEM = "Letter 750 ms";
+const char screenMorsePauseLength3[] PROGMEM = "Word 1750ms";
+
+void screenMorseParameters()
+{
+  display.setRotation(1);
+  display.setFullWindow();
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    display.setFont(&FreeSansBold12pt7b);
+    display.setTextColor(GxEPD_YELLOW);
+    int16_t tbx, tby; uint16_t tbw, tbh;
+    strcpy_P(progmem_buffer, screenMorseParametersTitle);
+    display.getTextBounds(progmem_buffer, 0, 0, &tbx, &tby, &tbw, &tbh);
+    // center the bounding box by transposition of the origin:
+    uint16_t x = ((display.width() - tbw) / 2) - tbx;
+    uint16_t y = tbh+2;
+    display.setCursor(x, y);
+    display.print(progmem_buffer);
+
+    display.setFont(&FreeSans9pt7b);
+    display.setTextColor(GxEPD_BLACK);
+
+    x = 16;
+    y = 40;
+    strcpy_P(progmem_buffer, screenMorseSignal);
+    display.setCursor(x, y);
+    display.print(progmem_buffer);
+
+    y += 16;
+    strcpy_P(progmem_buffer, screenMorseSymbolLengthDesc);
+    display.getTextBounds(progmem_buffer, 0, 0, &tbx, &tby, &tbw, &tbh);
+    display.setCursor(x, y);
+    display.print(progmem_buffer);
+    strcpy_P(progmem_buffer, screenMorseSymbolLength1);
+    display.setCursor(x + tbw + 4, y);
+    display.print(progmem_buffer);
+    strcpy_P(progmem_buffer, screenMorseSymbolLength2);
+    y += 16;
+    display.setCursor(x + tbw + 4, y);
+    display.print(progmem_buffer);
+
+    strcpy_P(progmem_buffer, screenMorsePauseLengthDesc);
+    y += 18;
+    display.setCursor(x, y);
+    display.print(progmem_buffer);
+    strcpy_P(progmem_buffer, screenMorsePauseLength1);
+    display.setCursor(x + tbw + 4, y);
+    display.print(progmem_buffer);
+    strcpy_P(progmem_buffer, screenMorsePauseLength2);
+    y += 16;
+    display.setCursor(x + tbw + 4, y);
+    display.print(progmem_buffer);
+    strcpy_P(progmem_buffer, screenMorsePauseLength3);
+    y += 16;
+    display.setCursor(x + tbw + 4, y);
     display.print(progmem_buffer);
 
   } while (display.nextPage());
@@ -383,6 +502,9 @@ void process_read_buffer() {
           strcmp(word_buffer, SECRET_WORD_2) == 0) {
         state = HINT;
       }
+      if (strcmp(word_buffer, HELP_WORD) == 0) {
+        state = INSTRUCTIONS;
+      }
     }
     word_complete = false;
     flush_buffers();
@@ -425,7 +547,11 @@ void loop() {
 
       case INSTRUCTIONS:
         Serial.println("Switching state to INSTRUCTIONS");
-        //helloWorld();
+        state = START;
+        screenMorseParameters();
+        delay(INSTRUCTION_SWITCH_INTERVAL);
+        screenMorseAlphabet();
+        delay(INSTRUCTION_SWITCH_INTERVAL);
         break;
 
       case HINT:
